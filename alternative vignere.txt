@@ -1,0 +1,58 @@
+        public static bool EncryptDecryptBinaryFile(string inputFile, string outputFile, int key, bool encrypt)
+        {
+            try
+            {
+                // Open the input binary file for reading
+                using (FileStream inputStream = new FileStream(inputFile, FileMode.Open))
+                {
+                    // Create a new binary writer to write to the output file
+                    using (BinaryWriter outputFileWriter = new BinaryWriter(File.Open(outputFile, FileMode.Create)))
+                    {
+                        // Read and process each byte in the input file
+                        int byteRead;
+                        while ((byteRead = inputStream.ReadByte()) != -1)
+                        {
+                            // Encrypt or decrypt the byte using the Caesar cipher
+                            byte processedByte = CaesarCipher((byte)byteRead, key, encrypt);
+
+                            // Write the processed byte to the output file
+                            outputFileWriter.Write(processedByte);
+                        }
+                    }
+                }
+                // Operation completed successfully
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // If any exception occurs, return false
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return false;
+            }
+        }
+        //3 Vignere
+        public static bool VigenereEncryptBinaryFile(string inputFile, string outputFile, string key)
+        {
+            // Read all bytes from the input file
+            try
+            {
+                byte[] dataToEncrypt = File.ReadAllBytes(inputFile);
+                byte[] encryptedData = new byte[dataToEncrypt.Length];
+
+                // Perform Vigenere encryption
+                for (int i = 0; i < dataToEncrypt.Length; i++)
+                {
+                    // Apply the Vigenere cipher algorithm
+                    encryptedData[i] = (byte)(dataToEncrypt[i] + key[i % key.Length]);
+                }
+
+                // Write the encrypted data to the output file
+                File.WriteAllBytes(outputFile, encryptedData);
+                return true;
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show("Encryption failed: " + ex.Message);
+                return false;
+            }
+        }

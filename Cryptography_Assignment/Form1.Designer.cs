@@ -47,10 +47,10 @@
             this.btnSpecialDecrypt = new System.Windows.Forms.Button();
             this.btnSpecialEncrypt = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.btnExit = new System.Windows.Forms.Button();
             this.txtKey = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.gbRSA.SuspendLayout();
             this.gbCaesar.SuspendLayout();
             this.gbVignere.SuspendLayout();
@@ -219,6 +219,7 @@
             this.btnSpecialDecrypt.TabIndex = 4;
             this.btnSpecialDecrypt.Text = "Decrypt";
             this.btnSpecialDecrypt.UseVisualStyleBackColor = true;
+            this.btnSpecialDecrypt.Click += new System.EventHandler(this.btnSpecialDecrypt_Click);
             // 
             // btnSpecialEncrypt
             // 
@@ -228,6 +229,7 @@
             this.btnSpecialEncrypt.TabIndex = 3;
             this.btnSpecialEncrypt.Text = "Encrypt";
             this.btnSpecialEncrypt.UseVisualStyleBackColor = true;
+            this.btnSpecialEncrypt.Click += new System.EventHandler(this.btnSpecialEncrypt_Click);
             // 
             // label2
             // 
@@ -237,15 +239,6 @@
             this.label2.Size = new System.Drawing.Size(155, 13);
             this.label2.TabIndex = 9;
             this.label2.Text = "Choose cryptography algorithm:";
-            // 
-            // pictureBox1
-            // 
-            this.pictureBox1.Image = global::Cryptography_Assignment.Properties.Resources._6scI;
-            this.pictureBox1.Location = new System.Drawing.Point(0, 0);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(32, 14);
-            this.pictureBox1.TabIndex = 10;
-            this.pictureBox1.TabStop = false;
             // 
             // btnExit
             // 
@@ -272,6 +265,15 @@
             this.label3.Size = new System.Drawing.Size(317, 13);
             this.label3.TabIndex = 13;
             this.label3.Text = "Enter the key you would like to use for algorithm that require them:";
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Image = global::Cryptography_Assignment.Properties.Resources._6scI;
+            this.pictureBox1.Location = new System.Drawing.Point(0, 0);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(32, 14);
+            this.pictureBox1.TabIndex = 10;
+            this.pictureBox1.TabStop = false;
             // 
             // frmMain
             // 

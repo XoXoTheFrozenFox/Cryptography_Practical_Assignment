@@ -12,6 +12,7 @@ using System.IO;
 using System.Threading;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Drawing.Drawing2D;
+using System.Linq.Expressions;
 
 namespace Cryptography_Assignment
 {
@@ -159,38 +160,56 @@ namespace Cryptography_Assignment
                 }
             }
 
-            public static void EncryptFileRSA(string inputFile, string outputFile)
+            public static bool EncryptFileRSA(string inputFile, string outputFile)
             {
-                GenerateRSAKeys(); // Generate RSA keys before encryption
-
-                byte[] dataToEncrypt = File.ReadAllBytes(inputFile);
-                List<byte[]> encryptedBlocks = new List<byte[]>();
-
-                int blockSize = (publicKey.Modulus.Length / 8) - 11; // Calculate the maximum block size for RSA encryption
-
-                // Encrypt each block separately
-                for (int i = 0; i < dataToEncrypt.Length; i += blockSize)
+                try
                 {
-                    int remainingBytes = Math.Min(blockSize, dataToEncrypt.Length - i);
-                    byte[] blockToEncrypt = new byte[remainingBytes];
-                    Array.Copy(dataToEncrypt, i, blockToEncrypt, 0, remainingBytes);
+                    GenerateRSAKeys(); // Generate RSA keys before encryption
+                    byte[] dataToEncrypt = File.ReadAllBytes(inputFile);
+                    List<byte[]> encryptedBlocks = new List<byte[]>();
 
-                    byte[] encryptedBlock = EncryptRSA(blockToEncrypt);
-                    encryptedBlocks.Add(encryptedBlock);
+                    int blockSize = (publicKey.Modulus.Length / 8) - 11; // Calculate the maximum block size for RSA encryption
+
+                    // Encrypt each block separately
+                    for (int i = 0; i < dataToEncrypt.Length; i += blockSize)
+                    {
+                        int remainingBytes = Math.Min(blockSize, dataToEncrypt.Length - i);
+                        byte[] blockToEncrypt = new byte[remainingBytes];
+                        Array.Copy(dataToEncrypt, i, blockToEncrypt, 0, remainingBytes);
+
+                        byte[] encryptedBlock = EncryptRSA(blockToEncrypt);
+                        encryptedBlocks.Add(encryptedBlock);
+                    }
+
+                    // Concatenate all encrypted blocks
+                    byte[] encryptedData = encryptedBlocks.SelectMany(x => x).ToArray();
+                    File.WriteAllBytes(outputFile, encryptedData);
+
+                    return true; // Encryption completed successfully
                 }
-
-                // Concatenate all encrypted blocks
-                byte[] encryptedData = encryptedBlocks.SelectMany(x => x).ToArray();
-                File.WriteAllBytes(outputFile, encryptedData);
+                catch (Exception ex)
+                {
+                    // Log the exception or display an error message
+                    MessageBox.Show("Encryption failed: " + ex.Message);
+                    return false; // Encryption failed
+                }
             }
 
-            public static void DecryptFileRSA(string inputFile, string outputFile)
+            public static bool DecryptFileRSA(string inputFile, string outputFile)
             {
-                byte[] dataToDecrypt = File.ReadAllBytes(inputFile);
-                byte[] decryptedData = DecryptRSA(dataToDecrypt, privateKey);
-                File.WriteAllBytes(outputFile, decryptedData);
+                try
+                {
+                    byte[] dataToDecrypt = File.ReadAllBytes(inputFile);
+                    byte[] decryptedData = DecryptRSA(dataToDecrypt, privateKey);
+                    File.WriteAllBytes(outputFile, decryptedData);
+                    return true;
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show("Decryption failed: " + ex.Message);
+                    return false;      
+                }
             }
-
         }
 
         private string GetDownloadsFolderPath()
@@ -202,10 +221,11 @@ namespace Cryptography_Assignment
         {
             string inputFile = getPath();
             txtPath.Text = inputFile;
-            txtPath.Text = inputFile;
             string encryptedFile = GetDownloadsFolderPath() + "RSAEncrypted.bin"; // Save to Downloads folder
-            RSAEncryption.EncryptFileRSA(inputFile, encryptedFile);
-            MessageBox.Show("File encrypted using RSA successfully.");
+            if (RSAEncryption.EncryptFileRSA(inputFile, encryptedFile))
+            {
+                MessageBox.Show("File encrypted using RSA sucessful.");
+            }
         }
 
         private void btnRSADecrypt_Click(object sender, EventArgs e)
@@ -213,8 +233,10 @@ namespace Cryptography_Assignment
             string encryptedFile = getPath();
             txtPath.Text = encryptedFile;
             string decryptedFile = GetDownloadsFolderPath() + "RSADecrypted.bin"; // Save to Downloads folder
-            RSAEncryption.DecryptFileRSA(encryptedFile, decryptedFile);
-            MessageBox.Show("File decrypted using RSA successfully.");
+            if (RSAEncryption.DecryptFileRSA(encryptedFile, decryptedFile))
+            {
+                MessageBox.Show("File decrypted using RSA sucessful.");
+            }
         }
         //Caesar 2
         private static byte CaesarCipher(byte inputByte, int key, bool encrypt)
@@ -232,99 +254,309 @@ namespace Cryptography_Assignment
         }
 
         // Function to encrypt or decrypt a binary file using the Caesar cipher
-        public static void EncryptDecryptBinaryFile(string inputFile, string outputFile, int key, bool encrypt)
+        public static bool EncryptDecryptBinaryFile(string inputFile, string outputFile, int key, bool encrypt)
         {
-            // Open the input binary file for reading
-            using (FileStream inputStream = new FileStream(inputFile, FileMode.Open))
+            try
             {
-                // Create a new binary writer to write to the output file
-                using (BinaryWriter outputFileWriter = new BinaryWriter(File.Open(outputFile, FileMode.Create)))
+                // Open the input binary file for reading
+                using (FileStream inputStream = new FileStream(inputFile, FileMode.Open))
                 {
-                    // Read and process each byte in the input file
-                    int byteRead;
-                    while ((byteRead = inputStream.ReadByte()) != -1)
+                    // Create a new binary writer to write to the output file
+                    using (BinaryWriter outputFileWriter = new BinaryWriter(File.Open(outputFile, FileMode.Create)))
                     {
-                        // Encrypt or decrypt the byte using the Caesar cipher
-                        byte processedByte = CaesarCipher((byte)byteRead, key, encrypt);
+                        // Read and process each byte in the input file
+                        int byteRead;
+                        while ((byteRead = inputStream.ReadByte()) != -1)
+                        {
+                            // Encrypt or decrypt the byte using the Caesar cipher
+                            byte processedByte = CaesarCipher((byte)byteRead, key, encrypt);
 
-                        // Write the processed byte to the output file
-                        outputFileWriter.Write(processedByte);
+                            // Write the processed byte to the output file
+                            outputFileWriter.Write(processedByte);
+                        }
+                    }
+                }
+                // Operation completed successfully
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // If any exception occurs, return false
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return false;
+            }
+        }
+        //3 Vignere
+        public static bool VigenereEncryptBinaryFile(string inputFile, string outputFile, string key)
+        {
+            try
+            {
+                byte[] dataToEncrypt = File.ReadAllBytes(inputFile);
+                byte[] encryptedData = new byte[dataToEncrypt.Length];
+
+                for (int i = 0; i < dataToEncrypt.Length; i++)
+                {
+                    // Apply the Vigenere cipher algorithm
+                    int shift = key[i % key.Length] - 'A';
+                    encryptedData[i] = (byte)((dataToEncrypt[i] + shift) % 256);
+                }
+
+                File.WriteAllBytes(outputFile, encryptedData);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Encryption failed: " + ex.Message);
+                return false;
+            }
+        }
+
+        public static bool VigenereDecryptBinaryFile(string inputFile, string outputFile, string key)
+        {
+            try
+            {
+                byte[] dataToDecrypt = File.ReadAllBytes(inputFile);
+                byte[] decryptedData = new byte[dataToDecrypt.Length];
+
+                for (int i = 0; i < dataToDecrypt.Length; i++)
+                {
+                    // Apply the Vigenere cipher algorithm
+                    int shift = key[i % key.Length] - 'A';
+                    decryptedData[i] = (byte)((dataToDecrypt[i] - shift + 256) % 256);
+                }
+
+                File.WriteAllBytes(outputFile, decryptedData);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Decryption failed: " + ex.Message);
+                return false;
+            }
+        }
+            //4 Vernam
+            public static bool VernamEncryptBinaryFile(string inputFile, string outputFile, string key)
+        {
+            try
+            {
+                // Read all bytes from the input file
+                byte[] dataToEncrypt = File.ReadAllBytes(inputFile);
+                byte[] encryptedData = new byte[dataToEncrypt.Length];
+
+                // Perform Vernam encryption
+                for (int i = 0; i < dataToEncrypt.Length; i++)
+                {
+                    // Apply the Vernam cipher algorithm
+                    encryptedData[i] = (byte)(dataToEncrypt[i] ^ key[i % key.Length]);
+                }
+
+                // Write the encrypted data to the output file
+                File.WriteAllBytes(outputFile, encryptedData);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Encryption failed: " + ex.Message);
+                return false;
+            }
+        }
+        public static bool VernamDecryptBinaryFile(string inputFile, string outputFile, string key)
+        {
+            try
+            {
+                // Read all bytes from the input file
+                byte[] dataToDecrypt = File.ReadAllBytes(inputFile);
+                byte[] decryptedData = new byte[dataToDecrypt.Length];
+
+                // Perform Vernam decryption (same as encryption because it's symmetric)
+                for (int i = 0; i < dataToDecrypt.Length; i++)
+                {
+                    // Apply the Vernam cipher algorithm
+                    decryptedData[i] = (byte)(dataToDecrypt[i] ^ key[i % key.Length]);
+                }
+
+                // Write the decrypted data to the output file
+                File.WriteAllBytes(outputFile, decryptedData);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Decryption failed: " + ex.Message);
+                return false;
+            }
+        }
+        //5 Hybrid algorithm
+        public class HybridEncryption
+        {
+            private static RSAParameters publicKey;
+            private static RSAParameters privateKey;
+
+            public static void GenerateRSAKeys()
+            {
+                using (var rsa = new RSACryptoServiceProvider(2048))
+                {
+                    publicKey = rsa.ExportParameters(false);
+                    privateKey = rsa.ExportParameters(true);
+                }
+            }
+
+            public static byte[] EncryptRSA(byte[] data)
+            {
+                using (var rsa = new RSACryptoServiceProvider())
+                {
+                    rsa.ImportParameters(publicKey);
+                    return rsa.Encrypt(data, RSAEncryptionPadding.Pkcs1);
+                }
+            }
+
+            public static byte[] DecryptRSA(byte[] data, RSAParameters privateKey)
+            {
+                using (var rsa = new RSACryptoServiceProvider())
+                {
+                    rsa.ImportParameters(privateKey);
+                    return rsa.Decrypt(data, RSAEncryptionPadding.Pkcs1);
+                }
+            }
+
+            public static byte[] GenerateAESKey()
+            {
+                using (var aes = Aes.Create())
+                {
+                    aes.GenerateKey();
+                    return aes.Key;
+                }
+            }
+
+            public static byte[] EncryptAES(byte[] data, byte[] key)
+            {
+                using (var aes = Aes.Create())
+                {
+                    aes.Key = key;
+                    using (var encryptor = aes.CreateEncryptor())
+                    {
+                        using (MemoryStream ms = new MemoryStream())
+                        {
+                            using (CryptoStream cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
+                            {
+                                cs.Write(data, 0, data.Length);
+                                cs.FlushFinalBlock();
+                            }
+                            return ms.ToArray();
+                        }
                     }
                 }
             }
 
-            Console.WriteLine(encrypt ? "File encrypted successfully." : "File decrypted successfully.");
-        }
-        //3 Vignere
-        public static void VigenereEncryptBinaryFile(string inputFile, string outputFile, string key)
-        {
-            // Read all bytes from the input file
-            byte[] dataToEncrypt = File.ReadAllBytes(inputFile);
-            byte[] encryptedData = new byte[dataToEncrypt.Length];
-
-            // Perform Vigenere encryption
-            for (int i = 0; i < dataToEncrypt.Length; i++)
+            public static byte[] DecryptAES(byte[] data, byte[] key)
             {
-                // Apply the Vigenere cipher algorithm
-                encryptedData[i] = (byte)(dataToEncrypt[i] + key[i % key.Length]);
+                using (var aes = Aes.Create())
+                {
+                    aes.Key = key;
+                    using (var decryptor = aes.CreateDecryptor())
+                    {
+                        using (MemoryStream ms = new MemoryStream())
+                        {
+                            using (CryptoStream cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Write))
+                            {
+                                cs.Write(data, 0, data.Length);
+                                cs.FlushFinalBlock();
+                            }
+                            return ms.ToArray();
+                        }
+                    }
+                }
+            }
+            public static bool EncryptFileHybrid(string inputFile, string outputFile)
+            {
+                try
+                {
+                    GenerateRSAKeys(); // Generate RSA keys before encryption
+                    byte[] aesKey = GenerateAESKey();
+                    byte[] encryptedAESKey = EncryptRSA(aesKey);
+
+                    byte[] dataToEncrypt = File.ReadAllBytes(inputFile);
+
+                    using (Aes aesAlg = Aes.Create())
+                    {
+                        aesAlg.Key = aesKey;
+                        aesAlg.GenerateIV(); // Generate IV
+                        byte[] iv = aesAlg.IV;
+
+                        using (MemoryStream ms = new MemoryStream())
+                        {
+                            // Write IV to the beginning of the MemoryStream
+                            ms.Write(iv, 0, iv.Length);
+
+                            using (CryptoStream cs = new CryptoStream(ms, aesAlg.CreateEncryptor(), CryptoStreamMode.Write))
+                            {
+                                // Write encrypted data to the CryptoStream
+                                cs.Write(dataToEncrypt, 0, dataToEncrypt.Length);
+                                cs.FlushFinalBlock();
+                            }
+                            byte[] encryptedData = ms.ToArray();
+
+                            using (var combinedStream = new MemoryStream())
+                            {
+                                combinedStream.Write(encryptedAESKey, 0, encryptedAESKey.Length);
+                                combinedStream.Write(encryptedData, 0, encryptedData.Length);
+
+                                File.WriteAllBytes(outputFile, combinedStream.ToArray());
+                            }
+                        }
+                    }
+
+                    return true; // Encryption completed successfully
+                }
+                catch (Exception ex)
+                {
+                    // Log the exception or display an error message
+                    MessageBox.Show("Encryption failed: " + ex.Message);
+                    return false; // Encryption failed
+                }
             }
 
-            // Write the encrypted data to the output file
-            File.WriteAllBytes(outputFile, encryptedData);
-            MessageBox.Show("File encrypted using Vigenere cipher successfully.");
-        }
-
-        public static void VigenereDecryptBinaryFile(string inputFile, string outputFile, string key)
-        {
-            // Read all bytes from the input file
-            byte[] dataToDecrypt = File.ReadAllBytes(inputFile);
-            byte[] decryptedData = new byte[dataToDecrypt.Length];
-
-            // Perform Vigenere decryption
-            for (int i = 0; i < dataToDecrypt.Length; i++)
+            public static bool DecryptFileHybrid(string inputFile, string outputFile)
             {
-                // Apply the Vigenere cipher algorithm
-                decryptedData[i] = (byte)(dataToDecrypt[i] - key[i % key.Length]);
+                try
+                {
+                    byte[] encryptedData = File.ReadAllBytes(inputFile);
+                    byte[] encryptedAESKey = new byte[256];
+                    byte[] encryptedDataWithoutKey = new byte[encryptedData.Length - 256];
+
+                    Array.Copy(encryptedData, encryptedAESKey, 256);
+                    Array.Copy(encryptedData, 256, encryptedDataWithoutKey, 0, encryptedData.Length - 256);
+
+                    byte[] aesKey = DecryptRSA(encryptedAESKey, privateKey);
+
+                    using (Aes aesAlg = Aes.Create())
+                    {
+                        aesAlg.Key = aesKey;
+
+                        // Extract IV from the beginning of the encryptedData
+                        byte[] iv = new byte[aesAlg.IV.Length];
+                        Array.Copy(encryptedDataWithoutKey, iv, aesAlg.IV.Length);
+                        aesAlg.IV = iv;
+
+                        using (MemoryStream ms = new MemoryStream(encryptedDataWithoutKey, aesAlg.IV.Length, encryptedDataWithoutKey.Length - aesAlg.IV.Length))
+                        {
+                            using (CryptoStream cs = new CryptoStream(ms, aesAlg.CreateDecryptor(), CryptoStreamMode.Read))
+                            {
+                                using (MemoryStream decryptedStream = new MemoryStream())
+                                {
+                                    cs.CopyTo(decryptedStream);
+                                    File.WriteAllBytes(outputFile, decryptedStream.ToArray());
+                                }
+                            }
+                        }
+                    }
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Decryption failed: " + ex.Message);
+                    return false;
+                }
             }
-
-            // Write the decrypted data to the output file
-            File.WriteAllBytes(outputFile, decryptedData);
-            MessageBox.Show("File decrypted using Vigenere cipher successfully.");
-        }
-        public static void VernamEncryptBinaryFile(string inputFile, string outputFile, string key)
-        {
-            // Read all bytes from the input file
-            byte[] dataToEncrypt = File.ReadAllBytes(inputFile);
-            byte[] encryptedData = new byte[dataToEncrypt.Length];
-
-            // Perform Vernam encryption
-            for (int i = 0; i < dataToEncrypt.Length; i++)
-            {
-                // Apply the Vernam cipher algorithm
-                encryptedData[i] = (byte)(dataToEncrypt[i] ^ key[i % key.Length]);
-            }
-
-            // Write the encrypted data to the output file
-            File.WriteAllBytes(outputFile, encryptedData);
-            MessageBox.Show("File encrypted using Vernam cipher successfully.");
-        }
-        //4 Vernam
-        public static void VernamDecryptBinaryFile(string inputFile, string outputFile, string key)
-        {
-            // Read all bytes from the input file
-            byte[] dataToDecrypt = File.ReadAllBytes(inputFile);
-            byte[] decryptedData = new byte[dataToDecrypt.Length];
-
-            // Perform Vernam decryption (same as encryption because it's symmetric)
-            for (int i = 0; i < dataToDecrypt.Length; i++)
-            {
-                // Apply the Vernam cipher algorithm
-                decryptedData[i] = (byte)(dataToDecrypt[i] ^ key[i % key.Length]);
-            }
-
-            // Write the decrypted data to the output file
-            File.WriteAllBytes(outputFile, decryptedData);
-            MessageBox.Show("File decrypted using Vernam cipher successfully.");
         }
         private void btnCaesarEncrypt_Click(object sender, EventArgs e)
         {
@@ -338,8 +570,10 @@ namespace Cryptography_Assignment
             }
             else
             {
-                EncryptDecryptBinaryFile(inputFile, outputFile, key, true);
-                MessageBox.Show("File encrypted using Caesar cipher successfully.");
+                if(EncryptDecryptBinaryFile(inputFile, outputFile, key, true))
+                {
+                    MessageBox.Show("File encrypted using Caesar cipher sucessful.");
+                }
             }
         }
 
@@ -355,8 +589,10 @@ namespace Cryptography_Assignment
             }
             else
             {
-                EncryptDecryptBinaryFile(encryptedFile, decryptedFile, key, false);
-                MessageBox.Show("File decrypted using Caesar cipher successfully.");
+                if(EncryptDecryptBinaryFile(encryptedFile, decryptedFile, key, false))
+                {
+                    MessageBox.Show("File decrypted using Caesar cipher sucessful.");
+                }
             }
         }
 
@@ -367,7 +603,7 @@ namespace Cryptography_Assignment
 
         private void frmMain_ResizeEnd(object sender, EventArgs e)
         {
-            pictureBox1.Width = this.Width; 
+            pictureBox1.Width = this.Width;
             pictureBox1.Height = this.Height;
         }
 
@@ -392,8 +628,11 @@ namespace Cryptography_Assignment
                 MessageBox.Show("Please enter a string key.");
             }
             else
-            {
-                VigenereEncryptBinaryFile(inputFile, outputFile, key);
+            {   
+                if(VigenereEncryptBinaryFile(inputFile, outputFile, key))
+                {
+                    MessageBox.Show("File encrypted using vignere sucessful.");
+                }
             }
         }
 
@@ -402,13 +641,16 @@ namespace Cryptography_Assignment
             string encryptedFile = getPath();
             string decryptedFile = GetDownloadsFolderPath() + "VigenereDecrypted.bin"; // Save to Downloads folder
             string key = txtKey.Text;
-            if(txtKey.Text.Length == 0)
+            if (txtKey.Text.Length == 0)
             {
                 MessageBox.Show("Please enter a string key.");
             }
             else
             {
-                VigenereDecryptBinaryFile(encryptedFile, decryptedFile, key);
+                if (VigenereDecryptBinaryFile(encryptedFile, decryptedFile, key))
+                {
+                    MessageBox.Show("File decrypted using vignere sucessful.");
+                }     
             }
         }
 
@@ -423,7 +665,10 @@ namespace Cryptography_Assignment
             }
             else
             {
-                VernamEncryptBinaryFile(inputFile, outputFile, key);
+                if (VernamEncryptBinaryFile(inputFile, outputFile, key))
+                {
+                    MessageBox.Show("File encrypted using vernam sucessful.");
+                }
             }
         }
 
@@ -438,9 +683,31 @@ namespace Cryptography_Assignment
             }
             else
             {
-                VernamDecryptBinaryFile(encryptedFile, decryptedFile, key);
+                if (VernamDecryptBinaryFile(encryptedFile, decryptedFile, key))
+                {
+                    MessageBox.Show("File decrypted using vernam sucessful.");
+                }
             }
-            
+        }
+
+        private void btnSpecialEncrypt_Click(object sender, EventArgs e)
+        {
+            string encryptedFile = getPath();
+            string decryptedFile = GetDownloadsFolderPath() + "HybridEncrypted.bin"; // Save to Downloads folder
+            if (HybridEncryption.EncryptFileHybrid(encryptedFile, decryptedFile))
+            {
+                MessageBox.Show("File encrypted using hybrid successful.");
+            }
+        }
+
+        private void btnSpecialDecrypt_Click(object sender, EventArgs e)
+        {
+            string encryptedFile = getPath(); 
+            string decryptedFile = GetDownloadsFolderPath() + "HybridDecrypted.bin"; // Save decrypted file to Downloads folder;
+            if (HybridEncryption.DecryptFileHybrid(encryptedFile, decryptedFile))
+            {
+                MessageBox.Show("File decrypted using hybrid successful.");
+            }
         }
     }
 }

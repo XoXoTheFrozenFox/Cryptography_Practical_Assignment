@@ -63,9 +63,39 @@ namespace Cryptography_Assignment.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap _200w {
+            get {
+                object obj = ResourceManager.GetObject("200w", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap _35580d64b9b883fd0e0678595fc2aefd {
+            get {
+                object obj = ResourceManager.GetObject("35580d64b9b883fd0e0678595fc2aefd", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap _6scI {
             get {
                 object obj = ResourceManager.GetObject("6scI", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap hacker {
+            get {
+                object obj = ResourceManager.GetObject("hacker", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
