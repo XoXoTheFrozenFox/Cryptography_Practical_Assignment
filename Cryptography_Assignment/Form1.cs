@@ -89,7 +89,7 @@ namespace Cryptography_Assignment
             button.FlatStyle = FlatStyle.Flat;
             button.FlatAppearance.BorderSize = 0;
         }
-
+        private static String fileExtension;
         public String getPath()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -101,6 +101,11 @@ namespace Cryptography_Assignment
                 return openFileDialog.FileName;
             }
             return "";
+        }
+        private static string GetFileExtension(string fileName)
+        {
+            // Get the file extension from the input file name
+            return Path.GetExtension(fileName);
         }
         //RSA 1
         public class RSAEncryption
@@ -184,7 +189,7 @@ namespace Cryptography_Assignment
                     // Concatenate all encrypted blocks
                     byte[] encryptedData = encryptedBlocks.SelectMany(x => x).ToArray();
                     File.WriteAllBytes(outputFile, encryptedData);
-
+                    fileExtension = GetFileExtension(inputFile);
                     return true; // Encryption completed successfully
                 }
                 catch (Exception ex)
@@ -232,7 +237,7 @@ namespace Cryptography_Assignment
         {
             string encryptedFile = getPath();
             txtPath.Text = encryptedFile;
-            string decryptedFile = GetDownloadsFolderPath() + "RSADecrypted.bin"; // Save to Downloads folder
+            string decryptedFile = GetDownloadsFolderPath() + "RSADecrypted" + fileExtension; // Save to Downloads folder
             if (RSAEncryption.DecryptFileRSA(encryptedFile, decryptedFile))
             {
                 MessageBox.Show("File decrypted using RSA sucessful.");
@@ -276,7 +281,10 @@ namespace Cryptography_Assignment
                         }
                     }
                 }
-                // Operation completed successfully
+                if (GetFileExtension(inputFile) != ".bin")
+                {
+                    fileExtension = GetFileExtension(inputFile);
+                }
                 return true;
             }
             catch (Exception ex)
@@ -302,6 +310,7 @@ namespace Cryptography_Assignment
                 }
 
                 File.WriteAllBytes(outputFile, encryptedData);
+                fileExtension = GetFileExtension(inputFile);
                 return true;
             }
             catch (Exception ex)
@@ -352,6 +361,7 @@ namespace Cryptography_Assignment
 
                 // Write the encrypted data to the output file
                 File.WriteAllBytes(outputFile, encryptedData);
+                fileExtension = GetFileExtension(inputFile);
                 return true;
             }
             catch (Exception ex)
@@ -504,7 +514,7 @@ namespace Cryptography_Assignment
                             }
                         }
                     }
-
+                    fileExtension = GetFileExtension(inputFile);
                     return true; // Encryption completed successfully
                 }
                 catch (Exception ex)
@@ -580,7 +590,7 @@ namespace Cryptography_Assignment
         private void btnCaesarDecrypt_Click(object sender, EventArgs e)
         {
             string encryptedFile = getPath();
-            string decryptedFile = GetDownloadsFolderPath() + "CaesarDecrypted.bin"; // Save to Downloads folder
+            string decryptedFile = GetDownloadsFolderPath() + "CaesarDecrypted" + fileExtension; // Save to Downloads folder
             int key;
             if (!int.TryParse(txtKey.Text, out key))
             {
@@ -639,7 +649,7 @@ namespace Cryptography_Assignment
         private void btnVignereDecrypt_Click(object sender, EventArgs e)
         {
             string encryptedFile = getPath();
-            string decryptedFile = GetDownloadsFolderPath() + "VigenereDecrypted.bin"; // Save to Downloads folder
+            string decryptedFile = GetDownloadsFolderPath() + "VigenereDecrypted" + fileExtension; // Save to Downloads folder
             string key = txtKey.Text;
             if (txtKey.Text.Length == 0)
             {
@@ -675,7 +685,7 @@ namespace Cryptography_Assignment
         private void btnVernamDecrypt_Click(object sender, EventArgs e)
         {
             string encryptedFile = getPath();
-            string decryptedFile = GetDownloadsFolderPath() + "VernamDecrypted.bin"; // Save to Downloads folder
+            string decryptedFile = GetDownloadsFolderPath() + "VernamDecrypted" + fileExtension; // Save to Downloads folder
             string key = txtKey.Text;
             if (txtKey.Text.Length == 0)
             {
@@ -703,7 +713,7 @@ namespace Cryptography_Assignment
         private void btnSpecialDecrypt_Click(object sender, EventArgs e)
         {
             string encryptedFile = getPath(); 
-            string decryptedFile = GetDownloadsFolderPath() + "HybridDecrypted.bin"; // Save decrypted file to Downloads folder;
+            string decryptedFile = GetDownloadsFolderPath() + "HybridDecrypted" + fileExtension; // Save decrypted file to Downloads folder;
             if (HybridEncryption.DecryptFileHybrid(encryptedFile, decryptedFile))
             {
                 MessageBox.Show("File decrypted using hybrid successful.");
