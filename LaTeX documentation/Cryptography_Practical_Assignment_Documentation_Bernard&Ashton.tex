@@ -11,21 +11,154 @@
 {\normalfont\huge\bfseries}{}{0pt}{\Huge}
 
 \begin{document}
-\Title{Cryptography report}
-\Initials{B.}
-\FirstName{Bernard}
-\Surname{Swanepoel}
-\StudentNumber{39909476}
+\Title{Cryptography project manual}
+\Initials{A.}
+\FirstName{Ashton}
+\Surname{du Plessis}
+\StudentNumber{34202676}
 \Supervisor{Prof. Lynette Drevin}
 \MakeTitle 
 \pagenumbering{roman} 
 \tableofcontents
+\pagestyle{plain}
 \cleardoublepage 
 \pagenumbering{arabic} 
 
-\chapter[Vigenère cipher]{Vigenère cipher}
-\section{Encrypt}
-\begin{lstlisting}[language=Csh, caption={Endpoint to delete FITS file}]
+
+\chapter[RSA]{RSA}
+\section{Encryption}
+\begin{lstlisting}[language=Csh, caption={Code for RSA Encryption}]
+public static bool EncryptFileRSA(string inputFile, string outputFile)
+{
+    try
+    {
+        GenerateRSAKeys(); // Generate RSA keys before encryption
+        byte[] dataToEncrypt = File.ReadAllBytes(inputFile);
+        List<byte[]> encryptedBlocks = new List<byte[]>();
+    
+        // Calculate the maximum block size for RSA encryption
+        int blockSize = (publicKey.Modulus.Length / 8) - 11; 
+    
+        // Encrypt each block separately
+        for (int i = 0; i < dataToEncrypt.Length; i += blockSize)
+        {
+            int remainingBytes = Math.Min(blockSize, 
+            dataToEncrypt.Length - i);
+            byte[] blockToEncrypt = new byte[remainingBytes];
+            Array.Copy(dataToEncrypt, i, blockToEncrypt, 0, remainingBytes);    
+            byte[] encryptedBlock = EncryptRSA(blockToEncrypt);
+            encryptedBlocks.Add(encryptedBlock);
+        }
+    
+        // Concatenate all encrypted blocks
+        byte[] encryptedData = encryptedBlocks.SelectMany(x => x).ToArray();
+        File.WriteAllBytes(outputFile, encryptedData);
+        fileExtension = GetFileExtension(inputFile);
+        return true; // Encryption completed successfully
+    }
+    catch (Exception ex)
+    {
+        // Log the exception or display an error message
+        MessageBox.Show("Encryption failed: " + ex.Message);
+        return false; // Encryption failed
+    }
+}
+\end{lstlisting}
+
+\subsection{Description of RSA Encryption}
+
+The encryption algorithm for RSA works as follows:
+The GenerateRSAKeys() method is called to generate public and private keys. By using File.ReadAllBytes() the contents of the input file is read into a byte array called dataToEncrypt. In order to calculate the maximum block size for this algorithm the length of the public key modulus is divided by 8 and then subtracted by 11. The file content is divided into blocks, these blocks is based on the block size that was calculated earlier. Each of the blocks is encrypted separately by the use of the EncryptRSA() method. Once a block has been encrypted it is stored in a list named encryptedBlocks. Once all of the blocks have been encrypted it is concatenated into a new single byte array called encryptedData by using LINQ's SelectMany() method. The File.WriteAllBytes() method is used to write the now concatenated data to an output file. If the encryption process is completed this method will return true to indicate that the encryption was successful. If any exception occurs during this process a message box will show on the screen stating that the encryption failed, and a false will be return to indicate that the encryption failed.
+
+\section{Decryption}
+\begin{lstlisting}[language=Csh, caption={Code for RSA Decryption}]
+public static bool DecryptFileRSA(string inputFile, string outputFile)
+{
+    try
+    {
+        byte[] dataToDecrypt = File.ReadAllBytes(inputFile);
+        byte[] decryptedData = DecryptRSA(dataToDecrypt, privateKey);
+        File.WriteAllBytes(outputFile, decryptedData);
+        return true;
+    }
+    catch(Exception ex)
+    {
+        MessageBox.Show("Decryption failed: " + ex.Message);
+        return false;      
+    }
+}
+\end{lstlisting}
+
+\pagestyle{plain}
+\subsection{Description of RSA Decryption}
+
+The decryption algorithm for RSA works as follows:
+By using File.ReadAllBytes() the completed of the input file is read into a byte array called dataToDecrypt. The encrypted data is decrypted by using the DecryptRSA() method by passing the dataToDecrypt array and the privateKey. The decrypted data is written to the output file by using the File.WriteAllBytes() method. If the decryption process is completed this method will return true to indicate that the decryption was successful. If any exception occurs during this process a message box will show on the screen stating that the decryption failed, and a false will be return to indicate that the decryption failed.
+
+\chapter[Caeser Cipher]{Caeser Cipher}
+\section{Encryption and Decryption}
+\begin{lstlisting}[language=Csh, caption={Code for Encryption and Decryption of Caeser Cipher}]
+private static byte CaesarCipher(byte inputByte, int key, bool encrypt)
+{
+    if (encrypt)
+    {
+        // Encryption: Shift the byte value by the key
+        return (byte)((inputByte + key) % 256);
+    }
+    else
+    {
+        // Decryption: Shift the byte value backwards by the key
+        return (byte)((inputByte - key + 256) % 256);
+    }
+}
+    
+// Function to encrypt or decrypt a binary file using the Caesar cipher
+public static bool EncryptDecryptBinaryFile(string inputFile, 
+string outputFile, int key, bool encrypt)
+{
+    try
+    {
+        // Open the input binary file for reading
+        using (FileStream inputStream = new FileStream(inputFile, 
+        FileMode.Open))
+        {
+            // Create a new binary writer to write to the output file
+            using (BinaryWriter outputFileWriter = new BinaryWriter
+            (File.Open(outputFile, FileMode.Create)))
+            {
+                // Read and process each byte in the input file
+                int byteRead;
+                while ((byteRead = inputStream.ReadByte()) != -1)
+                {
+                    // Encrypt or decrypt the byte using the Caesar cipher
+                    byte processedByte = CaesarCipher((byte)byteRead, 
+                    key, encrypt);
+    
+                    // Write the processed byte to the output file
+                    outputFileWriter.Write(processedByte);
+                }
+            }
+        }
+        if (GetFileExtension(inputFile) != ".bin")
+        {
+            fileExtension = GetFileExtension(inputFile);
+        }
+        return true;
+    }
+    catch (Exception ex)
+    {
+        // If any exception occurs, return false
+        Console.WriteLine($"An error occurred: {ex.Message}");
+        return false;
+    }
+}
+\end{lstlisting}
+
+\subsection{Description of Caeser Cipher Encryption and Decryption}
+
+\chapter[Vigenère Cipher]{Vigenère Cipher}
+\section{Encryption}
+\begin{lstlisting}[language=Csh, caption={Code for Vigenère Cipher Encryption}]
 public static bool VigenereEncryptBinaryFile(string inputFile, 
 string outputFile, string key)
 {
@@ -53,9 +186,24 @@ string outputFile, string key)
     }
 }
 \end{lstlisting}
-\section{Decrypt}
-\pagestyle{plain}
-\begin{lstlisting}[language=Csh, caption={Endpoint to delete FITS file}]
+
+\subsection{Description of Vigenère Cipher Encryption}
+
+The encryption algorithm for this Vigenère Cipher works as follows:
+By using File.ReadAllBytes() the completed of the input file is read into a byte array called dataToEncrypt. A new byte array called encryptedData is created that will hold the encrypted bytes, this array has the same length as dataToEncrypt. By using a for loop to iterate through each byte in the dataToEncrypt array the following is applied to each byte:
+\begin{itemize}
+    \item 
+        It calculates the shift based on the corresponding character in the key. The shift value is obtained by subtracting 'A' from the ASCII value of the character in the key. This assumes that the key contains uppercase alphabetic characters only.
+    \item 
+        It encrypts the byte by adding the shift value to the byte's value and taking the result modulo 256 (to ensure it stays within the byte range).
+    \item 
+        The encrypted byte is stored in the encryptedData array.
+\end{itemize}
+Once all of the bytes are encrypted the contents of the encryptedData array is written to the output file by using the File.WriteAllBytes() method. The global variable fileExtension is set to the file exception of the input file, to get the file exception of the input file the method GetFileExtension() is used. If the encryption process is completed this method will return true to indicate that the encryption was successful. If any exception occurs during this process a message box will show on the screen stating that the encryption failed, and a false will be return to indicate that the encryption failed.
+
+\section{Decryption}
+
+\begin{lstlisting}[language=Csh, caption={Code for Vigenère Cipher Decryption}]
 public static bool VigenereDecryptBinaryFile(string inputFile, 
 string outputFile, string key)
 {
@@ -82,11 +230,24 @@ string outputFile, string key)
     }
 }
 \end{lstlisting}
-Cite 1\citep{AUT2018}.\vspace{0.25cm}
-\noindent Cite 2 \citep{AUT1999}
+
+\subsection{Description of Vigenère Cipher Decryption}
+
+The decryption algorithm for this Vigenère Cipher works as follows:
+By using File.ReadAllBytes() the completed of the input file is read into a byte array called dataToDecrypt. A new byte array called decryptedData is created that will hold the encrypted bytes, this array has the same length as dataToDecrypt. By using a for loop to iterate through each byte in the dataToDecrypt array the following is applied to each byte:
+\begin{itemize}
+    \item 
+        It calculates the shift based on the corresponding character in the key. The shift value is obtained by subtracting 'A' from the ASCII value of the character in the key.
+    \item 
+        It decrypts the byte by subtracting the shift value from the byte's value, adding 256 to handle negative results, and then taking the result modulo 256 (to ensure it stays within the byte range).
+    \item 
+        The decrypted byte is stored in the decryptedData array.
+\end{itemize}
+Once all of the bytes are decrypted the contents of the decryptedData array is written to the output file by using the File.WriteAllBytes() method. If the decryption process is completed this method will return true to indicate that the decryption was successful. If any exception occurs during this process a message box will show on the screen stating that the decryption failed, and a false will be return to indicate that the decryption failed.
+
 \chapter[Vernam Cipher]{Vernam Cipher}
-\section{Encrypt}
-\begin{lstlisting}[language=Csh, caption={Endpoint to delete FITS file}]
+\section{Encryption}
+\begin{lstlisting}[language=Csh, caption={Code for Vernam Cipher Encryption}]
 public static bool VernamEncryptBinaryFile(string inputFile, 
 string outputFile, string key)
 {
@@ -116,8 +277,14 @@ string outputFile, string key)
     }
 }
 \end{lstlisting}
-\section{Decrypt}
-\begin{lstlisting}[language=Csh, caption={Endpoint to delete FITS file}]
+
+\subsection{Description of Vernam Cipher Encryption}
+
+The encryption algorithm for this Vernam Cipher works as follows:
+By using File.ReadAllBytes() the completed of the input file is read into a byte array called dataToEncrypt. A new byte array called encryptedData is created that will hold the encrypted bytes, this array has the same length as dataToEncrypt. By using a for loop to iterate through each byte in the dataToEncrypt array, a bitwise XOR (\^) operation is performed between each byte of the input data and the corresponding byte of the key. If the key is shorter than the input data it repeated, by using the modulus operator \% with the length of the key. The result of the XOR operation on the  dataToEncrypt array is stored in the encryptedData array. Once all of the bytes are encrypted the contents of the encryptedData array is written to the output file by using the File.WriteAllBytes() method. The global variable fileExtension is set to the file exception of the input file, to get the file exception of the input file the method GetFileExtension() is used. If the encryption process is completed this method will return true to indicate that the encryption was successful. If any exception occurs during this process a message box will show on the screen stating that the encryption failed, and a false will be return to indicate that the encryption failed.
+
+\section{Decryption}
+\begin{lstlisting}[language=Csh, caption={Code for Vernam Cipher Decryption}]
 public static bool VernamDecryptBinaryFile(string inputFile, 
 string outputFile, string key)
 {
@@ -147,9 +314,28 @@ string outputFile, string key)
     }
 }
 \end{lstlisting}
-\chapter[Special cipher]{Special cipher}
-\section{Encrypt}
-\begin{lstlisting}[language=Csh, caption={Endpoint to delete FITS file}]
+
+\subsection{Description of Vernam Cipher Decryption}
+
+The decryption algorithm of this Vernam Cipher works as follows:
+By using File.ReadAllBytes() the completed of the input file is read into a byte array called dataToDecrypt. A new byte array called decryptedData is created that will hold the encrypted bytes, this array has the same length as dataToDecrypt. By using a for loop to iterate through each byte in the dataToDecrypt array, just like the encryption, a bitwise XOR (\^) operation is performed between each byte of the input data and the corresponding byte of the key. If the key is shorter than the input data it repeated, by using the modulus operator \% with the length of the key. The result of the XOR operation on the  dataToDecrypt array is stored in the decryptedData array. Once all of the bytes are encrypted the contents of the decryptedData array is written to the output file by using the File.WriteAllBytes() method. The global variable fileExtension is set to the file exception of the input file, to get the file exception of the input file the method GetFileExtension() is used. If the decryption process is completed this method will return true to indicate that the decryption was successful. If any exception occurs during this process a message box will show on the screen stating that the decryption failed, and a false will be return to indicate that the decryption failed.
+
+\chapter[Transposition Cipher]{Transposition Cipher}
+\section{Encryption}
+\begin{lstlisting}[language=Csh, caption={Code for Transposition Cipher Encryption}]
+\end{lstlisting}
+
+\subsection{Description of Transposition Cipher Encryption}
+
+\section{Decryption}
+\begin{lstlisting}[language=Csh, caption={Code for Transposition Cipher Decryption}]
+\end{lstlisting}
+
+\subsection{Description of Transposition Cipher Decryption}
+
+\chapter[Special Cipher]{Special Cipher}
+\section{Encryption}
+\begin{lstlisting}[language=Csh, caption={Code for Special Cipher Encryption}]
 public static bool EncryptFileHybrid(string inputFile, 
 string outputFile)
 {
@@ -203,8 +389,11 @@ string outputFile)
     }
 }
 \end{lstlisting}
-\section{Decrypt}
-\begin{lstlisting}[language=Csh, caption={Endpoint to delete FITS file}]
+
+\subsection{Description of Special Cipher Encryption}
+
+\section{Decryption}
+\begin{lstlisting}[language=Csh, caption={Code for Special Cipher Decryption}]
 public static bool DecryptFileHybrid(string inputFile, string outputFile)
 {
     try
@@ -229,8 +418,9 @@ public static bool DecryptFileHybrid(string inputFile, string outputFile)
             Array.Copy(encryptedDataWithoutKey, iv, aesAlg.IV.Length);
             aesAlg.IV = iv;
     
-            using (MemoryStream ms = new MemoryStream(encryptedDataWithoutKey, 
-            aesAlg.IV.Length, encryptedDataWithoutKey.Length - aesAlg.IV.Length))
+            using (MemoryStream ms = new MemoryStream
+            (encryptedDataWithoutKey, aesAlg.IV.Length, 
+            encryptedDataWithoutKey.Length - aesAlg.IV.Length))
             {
                 using (CryptoStream cs = new CryptoStream(ms, 
                 aesAlg.CreateDecryptor(), CryptoStreamMode.Read))
@@ -253,117 +443,13 @@ public static bool DecryptFileHybrid(string inputFile, string outputFile)
     }
 }
 \end{lstlisting}
-\chapter[RSA]{RSA}
-\section{Encrypt}
-\begin{lstlisting}[language=Csh, caption={Endpoint to delete FITS file}]
-public static bool EncryptFileRSA(string inputFile, string outputFile)
-{
-    try
-    {
-        GenerateRSAKeys(); // Generate RSA keys before encryption
-        byte[] dataToEncrypt = File.ReadAllBytes(inputFile);
-        List<byte[]> encryptedBlocks = new List<byte[]>();
-    
-        // Calculate the maximum block size for RSA encryption
-        int blockSize = (publicKey.Modulus.Length / 8) - 11; 
-    
-        // Encrypt each block separately
-        for (int i = 0; i < dataToEncrypt.Length; i += blockSize)
-        {
-            int remainingBytes = Math.Min(blockSize, dataToEncrypt.Length - i);
-            byte[] blockToEncrypt = new byte[remainingBytes];
-            Array.Copy(dataToEncrypt, i, blockToEncrypt, 0, remainingBytes);
-    
-            byte[] encryptedBlock = EncryptRSA(blockToEncrypt);
-            encryptedBlocks.Add(encryptedBlock);
-        }
-    
-        // Concatenate all encrypted blocks
-        byte[] encryptedData = encryptedBlocks.SelectMany(x => x).ToArray();
-        File.WriteAllBytes(outputFile, encryptedData);
-        fileExtension = GetFileExtension(inputFile);
-        return true; // Encryption completed successfully
-    }
-    catch (Exception ex)
-    {
-        // Log the exception or display an error message
-        MessageBox.Show("Encryption failed: " + ex.Message);
-        return false; // Encryption failed
-    }
-}
-\end{lstlisting}
-\section{Decrypt}
-\begin{lstlisting}[language=Csh, caption={Endpoint to delete FITS file}]
-public static bool DecryptFileRSA(string inputFile, string outputFile)
-{
-    try
-    {
-        byte[] dataToDecrypt = File.ReadAllBytes(inputFile);
-        byte[] decryptedData = DecryptRSA(dataToDecrypt, privateKey);
-        File.WriteAllBytes(outputFile, decryptedData);
-        return true;
-    }
-    catch(Exception ex)
-    {
-        MessageBox.Show("Decryption failed: " + ex.Message);
-        return false;      
-    }
-}
-\end{lstlisting}
-\chapter[Caeser cipher]{Caeser cipher}
-\section{Encrypt}
-\begin{lstlisting}[language=Csh, caption={Endpoint to delete FITS file}]
-private static byte CaesarCipher(byte inputByte, int key, bool encrypt)
-{
-    if (encrypt)
-    {
-        // Encryption: Shift the byte value by the key
-        return (byte)((inputByte + key) % 256);
-    }
-    else
-    {
-        // Decryption: Shift the byte value backwards by the key
-        return (byte)((inputByte - key + 256) % 256);
-    }
-}
-    
-// Function to encrypt or decrypt a binary file using the Caesar cipher
-public static bool EncryptDecryptBinaryFile(string inputFile, string outputFile, int key, bool encrypt)
-{
-    try
-    {
-        // Open the input binary file for reading
-        using (FileStream inputStream = new FileStream(inputFile, FileMode.Open))
-        {
-            // Create a new binary writer to write to the output file
-            using (BinaryWriter outputFileWriter = new BinaryWriter(File.Open(outputFile, FileMode.Create)))
-            {
-                // Read and process each byte in the input file
-                int byteRead;
-                while ((byteRead = inputStream.ReadByte()) != -1)
-                {
-                    // Encrypt or decrypt the byte using the Caesar cipher
-                    byte processedByte = CaesarCipher((byte)byteRead, key, encrypt);
-    
-                    // Write the processed byte to the output file
-                    outputFileWriter.Write(processedByte);
-                }
-            }
-        }
-        if (GetFileExtension(inputFile) != ".bin")
-        {
-            fileExtension = GetFileExtension(inputFile);
-        }
-        return true;
-    }
-    catch (Exception ex)
-    {
-        // If any exception occurs, return false
-        Console.WriteLine($"An error occurred: {ex.Message}");
-        return false;
-    }
-}
-\end{lstlisting}
+
+\subsection{Description of Special Cipher Decryption}
+
+
+
+Cite 1\citep{AUT2018}.\vspace{0.25cm}
+\noindent Cite 2 \citep{AUT1999}
 
 
 \bibliography{MyBib}
