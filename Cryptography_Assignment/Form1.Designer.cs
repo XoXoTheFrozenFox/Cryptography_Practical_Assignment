@@ -51,12 +51,16 @@
             this.txtKey = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.gbTranspositional = new System.Windows.Forms.GroupBox();
+            this.btnTranspositionDecrypt = new System.Windows.Forms.Button();
+            this.btnTranspositionEncrypt = new System.Windows.Forms.Button();
             this.gbRSA.SuspendLayout();
             this.gbCaesar.SuspendLayout();
             this.gbVignere.SuspendLayout();
             this.gbVernam.SuspendLayout();
             this.gbSpecial.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.gbTranspositional.SuspendLayout();
             this.SuspendLayout();
             // 
             // txtPath
@@ -147,7 +151,7 @@
             this.gbVignere.Size = new System.Drawing.Size(200, 83);
             this.gbVignere.TabIndex = 6;
             this.gbVignere.TabStop = false;
-            this.gbVignere.Text = "Vignere";
+            this.gbVignere.Text = "Vigenère";
             // 
             // btnVignereDecrypt
             // 
@@ -204,7 +208,7 @@
             // 
             this.gbSpecial.Controls.Add(this.btnSpecialDecrypt);
             this.gbSpecial.Controls.Add(this.btnSpecialEncrypt);
-            this.gbSpecial.Location = new System.Drawing.Point(218, 205);
+            this.gbSpecial.Location = new System.Drawing.Point(424, 205);
             this.gbSpecial.Name = "gbSpecial";
             this.gbSpecial.Size = new System.Drawing.Size(200, 83);
             this.gbSpecial.TabIndex = 8;
@@ -242,9 +246,9 @@
             // 
             // btnExit
             // 
-            this.btnExit.Location = new System.Drawing.Point(424, 210);
+            this.btnExit.Location = new System.Drawing.Point(12, 294);
             this.btnExit.Name = "btnExit";
-            this.btnExit.Size = new System.Drawing.Size(200, 77);
+            this.btnExit.Size = new System.Drawing.Size(612, 77);
             this.btnExit.TabIndex = 11;
             this.btnExit.Text = "Exit";
             this.btnExit.UseVisualStyleBackColor = true;
@@ -275,11 +279,43 @@
             this.pictureBox1.TabIndex = 10;
             this.pictureBox1.TabStop = false;
             // 
+            // gbTranspositional
+            // 
+            this.gbTranspositional.Controls.Add(this.btnTranspositionDecrypt);
+            this.gbTranspositional.Controls.Add(this.btnTranspositionEncrypt);
+            this.gbTranspositional.Location = new System.Drawing.Point(218, 205);
+            this.gbTranspositional.Name = "gbTranspositional";
+            this.gbTranspositional.Size = new System.Drawing.Size(200, 83);
+            this.gbTranspositional.TabIndex = 9;
+            this.gbTranspositional.TabStop = false;
+            this.gbTranspositional.Text = "Transposition";
+            // 
+            // btnTranspositionDecrypt
+            // 
+            this.btnTranspositionDecrypt.Location = new System.Drawing.Point(6, 48);
+            this.btnTranspositionDecrypt.Name = "btnTranspositionDecrypt";
+            this.btnTranspositionDecrypt.Size = new System.Drawing.Size(188, 23);
+            this.btnTranspositionDecrypt.TabIndex = 4;
+            this.btnTranspositionDecrypt.Text = "Decrypt";
+            this.btnTranspositionDecrypt.UseVisualStyleBackColor = true;
+            this.btnTranspositionDecrypt.Click += new System.EventHandler(this.btnTranspositionDecrypt_Click);
+            // 
+            // btnTranspositionEncrypt
+            // 
+            this.btnTranspositionEncrypt.Location = new System.Drawing.Point(6, 19);
+            this.btnTranspositionEncrypt.Name = "btnTranspositionEncrypt";
+            this.btnTranspositionEncrypt.Size = new System.Drawing.Size(188, 23);
+            this.btnTranspositionEncrypt.TabIndex = 3;
+            this.btnTranspositionEncrypt.Text = "Encrypt";
+            this.btnTranspositionEncrypt.UseVisualStyleBackColor = true;
+            this.btnTranspositionEncrypt.Click += new System.EventHandler(this.btnTranspositionEncrypt_Click);
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(633, 299);
+            this.ClientSize = new System.Drawing.Size(635, 382);
+            this.Controls.Add(this.gbTranspositional);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.txtKey);
             this.Controls.Add(this.btnExit);
@@ -305,6 +341,7 @@
             this.gbVernam.ResumeLayout(false);
             this.gbSpecial.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            this.gbTranspositional.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -333,6 +370,9 @@
         private System.Windows.Forms.Button btnExit;
         private System.Windows.Forms.TextBox txtKey;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.GroupBox gbTranspositional;
+        private System.Windows.Forms.Button btnTranspositionDecrypt;
+        private System.Windows.Forms.Button btnTranspositionEncrypt;
     }
 }
 

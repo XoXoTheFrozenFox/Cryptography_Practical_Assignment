@@ -39,6 +39,8 @@ namespace Cryptography_Assignment
             txtKey.Font = new Font(txtPath.Font, FontStyle.Bold);
             btnCaesarEncrypt.Font = new Font(btnCaesarEncrypt.Font, FontStyle.Bold);
             btnCaesarDecrypt.Font = new Font(btnCaesarDecrypt.Font, FontStyle.Bold);
+            btnTranspositionEncrypt.Font = new Font(btnCaesarEncrypt.Font, FontStyle.Bold);
+            btnTranspositionDecrypt.Font = new Font(btnCaesarEncrypt.Font, FontStyle.Bold);
             btnVernamEncrypt.Font = new Font(btnVernamEncrypt.Font, FontStyle.Bold);
             btnVernamDecrypt.Font = new Font(btnVernamDecrypt.Font, FontStyle.Bold);
             btnRSAEncrypt.Font = new Font(btnRSAEncrypt.Font, FontStyle.Bold);
@@ -60,6 +62,8 @@ namespace Cryptography_Assignment
             btnVignereDecrypt.BackColor = Color.Gray;
             btnVernamEncrypt.BackColor = Color.Gray;
             btnVernamDecrypt.BackColor = Color.Gray;
+            btnTranspositionEncrypt.BackColor = Color.Gray;
+            btnTranspositionDecrypt.BackColor = Color.Gray;
             btnExit.BackColor = Color.Gray;
             this.BackColor = Color.Black;
             gbCaesar.ForeColor = Color.Lime; // Assuming NeonGreen is defined as Color.Lime
@@ -67,6 +71,7 @@ namespace Cryptography_Assignment
             gbVernam.ForeColor = Color.Lime; // Assuming NeonGreen is defined as Color.Lime
             gbVignere.ForeColor = Color.Lime; // Assuming NeonGreen is defined as Color.Lime
             gbSpecial.ForeColor = Color.Lime; // Assuming NeonGreen is defined as Color.Lime
+            gbTranspositional.ForeColor = Color.Lime; // Assuming NeonGreen is defined as Color.Lime
             label1.ForeColor = Color.Lime; // Assuming NeonGreen is defined as Color.Lime
             label2.ForeColor = Color.Lime; // Assuming NeonGreen is defined as Color.Lime
             label3.ForeColor = Color.Lime; // Assuming NeonGreen is defined as Color.Lime
@@ -81,6 +86,8 @@ namespace Cryptography_Assignment
             RemoveButtonBorder(btnVignereDecrypt);
             RemoveButtonBorder(btnVernamEncrypt);
             RemoveButtonBorder(btnVernamDecrypt);
+            RemoveButtonBorder(btnTranspositionEncrypt);
+            RemoveButtonBorder(btnTranspositionDecrypt);
             RemoveButtonBorder(btnExit);
             pictureBox1.SendToBack();
         }
@@ -345,7 +352,7 @@ namespace Cryptography_Assignment
         }
             //4 Vernam
             public static bool VernamEncryptBinaryFile(string inputFile, string outputFile, string key)
-        {
+            {
             try
             {
                 // Read all bytes from the input file
@@ -717,6 +724,157 @@ namespace Cryptography_Assignment
             if (HybridEncryption.DecryptFileHybrid(encryptedFile, decryptedFile))
             {
                 MessageBox.Show("File decrypted using hybrid successful.");
+            }
+        }
+
+        public class TranspositionCipher
+        {
+            // Function to encrypt a file using transposition cipher
+            public static bool TranspositionEncryptBinaryFile(string inputFile, string outputFile, string key)
+            {
+                try
+                {
+                    fileExtension = Path.GetExtension(inputFile);
+                    byte[] fileBytes = File.ReadAllBytes(inputFile);
+                    byte[] encryptedBytes = TranspositionEncrypt(fileBytes, key);
+                    File.WriteAllBytes(outputFile, encryptedBytes);
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error encrypting file: " + ex.Message);
+                    return false;
+                }
+            }
+
+            // Function to decrypt a file using transposition cipher
+            public static bool TranspositionDecryptBinaryFile(string encryptedFile, string decryptedFile, string key)
+            {
+                try
+                {
+                    byte[] encryptedBytes = File.ReadAllBytes(encryptedFile);
+                    byte[] decryptedBytes = TranspositionDecrypt(encryptedBytes, key);
+                    File.WriteAllBytes(decryptedFile, decryptedBytes);
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error decrypting file: " + ex.Message);
+                    return false;
+                }
+            }
+
+            // Function to encrypt bytes using transposition cipher
+            private static byte[] TranspositionEncrypt(byte[] inputBytes, string key)
+            {
+                int[] permutationOrder = GetPermutationOrder(key);
+
+                int keyLength = key.Length;
+                int numRows = (int)Math.Ceiling((double)inputBytes.Length / keyLength);
+
+                byte[,] matrix = new byte[numRows, keyLength];
+
+                // Populate the matrix with input bytes
+                for (int i = 0; i < inputBytes.Length; i++)
+                {
+                    matrix[i / keyLength, i % keyLength] = inputBytes[i];
+                }
+
+                List<byte> encryptedBytes = new List<byte>();
+
+                // Read the matrix column-wise according to permutation order
+                foreach (int column in permutationOrder)
+                {
+                    for (int row = 0; row < numRows; row++)
+                    {
+                        encryptedBytes.Add(matrix[row, column]);
+                    }
+                }
+
+                return encryptedBytes.ToArray();
+            }
+
+            // Function to decrypt bytes using transposition cipher
+            private static byte[] TranspositionDecrypt(byte[] encryptedBytes, string key)
+            {
+                int[] permutationOrder = GetPermutationOrder(key);
+
+                int keyLength = key.Length;
+                int numRows = (int)Math.Ceiling((double)encryptedBytes.Length / keyLength);
+
+                byte[,] matrix = new byte[numRows, keyLength];
+
+                // Populate the matrix column-wise according to permutation order
+                int encryptedIndex = 0;
+                foreach (int column in permutationOrder)
+                {
+                    for (int row = 0; row < numRows; row++)
+                    {
+                        matrix[row, column] = encryptedBytes[encryptedIndex++];
+                    }
+                }
+
+                List<byte> decryptedBytes = new List<byte>();
+
+                // Read the matrix row-wise to obtain decrypted bytes
+                for (int i = 0; i < numRows; i++)
+                {
+                    for (int j = 0; j < keyLength; j++)
+                    {
+                        decryptedBytes.Add(matrix[i, j]);
+                    }
+                }
+
+                return decryptedBytes.ToArray();
+            }
+
+            // Function to get the permutation order based on the key
+            private static int[] GetPermutationOrder(string key)
+            {
+                int[] permutationOrder = new int[key.Length];
+                for (int i = 0; i < key.Length; i++)
+                {
+                    permutationOrder[i] = i;
+                }
+
+                Array.Sort(key.ToCharArray(), permutationOrder);
+                return permutationOrder;
+            }
+        }
+
+        private void btnTranspositionEncrypt_Click(object sender, EventArgs e)
+        {
+            string inputFile = getPath();
+            string outputFile = GetDownloadsFolderPath() + "TranspositionEncrypted.bin"; // Save to Downloads folder
+            string key = txtKey.Text;
+            if (txtKey.Text.Length == 0)
+            {
+                MessageBox.Show("Please enter a string key.");
+            }
+            else
+            {
+                if (TranspositionCipher.TranspositionEncryptBinaryFile(inputFile, outputFile, key))
+                {
+                    MessageBox.Show("File encrypted using transposition cipher successful.");
+                }
+            }
+        }
+
+        private void btnTranspositionDecrypt_Click(object sender, EventArgs e)
+        {
+            string encryptedFile = getPath();
+            string decryptedFile = GetDownloadsFolderPath() + "TranspositionDecrypted" + fileExtension; // Save to Downloads folder with .bin extension
+            string key = txtKey.Text;
+            if (txtKey.Text.Length == 0)
+            {
+                MessageBox.Show("Please enter a string key.");
+            }
+            else
+            {
+                if (TranspositionCipher.TranspositionDecryptBinaryFile(encryptedFile, decryptedFile, key))
+                {
+                    MessageBox.Show("File decrypted using transposition cipher successful.");
+                }
             }
         }
     }
