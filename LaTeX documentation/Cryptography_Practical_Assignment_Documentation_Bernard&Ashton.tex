@@ -24,6 +24,9 @@
 \cleardoublepage 
 \pagenumbering{arabic} 
 
+\chapter[General Information]{General Information}
+
+\includegraphics[width=0.3\textwidth]{Cryptography_Practical_Assignment_GUI.png}
 
 \chapter[RSA]{RSA}
 \section{Encryption}
@@ -155,6 +158,18 @@ string outputFile, int key, bool encrypt)
 \end{lstlisting}
 
 \subsection{Description of Caeser Cipher Encryption and Decryption}
+
+The CaesarCipher() method determines if the input bytes are to be encrypted or decrypted. If it is to be encrypted the inputByte is added to the key and the result is then taken modulo 256 to ensure that it wraps around correctly within the byte range. The result of this calculation is caste to a byte and is return to be used in the main function for encrypting the input file. If it is not to be encrypted the key is subtracted from the inputByte, by adding 256 before taking the modulo 256 operation ensure that the result is always non-negative. The modulo operation ensures that the result wraps correctly around within the byte range. The result of this calculation is caste to a byte and is return to be used in the main function for decrypting the input file.
+
+The main algorithm for this Caeser Cipher works as follows:
+The input file is opened in read mode to read the concatenated of this file. The output is either created or overwritten and the file is being prepared to write binary data. A while loop is used to read each byte that is in the input file and the following is performed until the end of the file has bean reached:
+\begin{itemize}
+    \item 
+        Each of the bytes that is read is processed by the CaesarCipher() method and to encrypt and to decrypt is determined by the encrypt flag that the EncryptDecryptBinaryFile() method receives. 
+    \item 
+        The bytes that have been processed is written into the output file.
+\end{itemize}
+If the encryption or decryption process is completed this method will return true to indicate that the encryption or decryption was successful. If any exception occurs during this process a message box will show on the screen stating that the encryption or decryption failed, and a false will be return to indicate that the encryption or decryption failed.
 
 \chapter[Vigenère Cipher]{Vigenère Cipher}
 \section{Encryption}
@@ -321,21 +336,213 @@ The decryption algorithm of this Vernam Cipher works as follows:
 By using File.ReadAllBytes() the completed of the input file is read into a byte array called dataToDecrypt. A new byte array called decryptedData is created that will hold the encrypted bytes, this array has the same length as dataToDecrypt. By using a for loop to iterate through each byte in the dataToDecrypt array, just like the encryption, a bitwise XOR (\^) operation is performed between each byte of the input data and the corresponding byte of the key. If the key is shorter than the input data it repeated, by using the modulus operator \% with the length of the key. The result of the XOR operation on the  dataToDecrypt array is stored in the decryptedData array. Once all of the bytes are encrypted the contents of the decryptedData array is written to the output file by using the File.WriteAllBytes() method. The global variable fileExtension is set to the file exception of the input file, to get the file exception of the input file the method GetFileExtension() is used. If the decryption process is completed this method will return true to indicate that the decryption was successful. If any exception occurs during this process a message box will show on the screen stating that the decryption failed, and a false will be return to indicate that the decryption failed.
 
 \chapter[Transposition Cipher]{Transposition Cipher}
+
+\section{Code needed to perform Encryption and Decryption of the Transposition Cipher}
+\begin{lstlisting}[language=Csh, caption={Code for Transposition Cipher}]
+// Function to get the permutation order based on the key
+private static int[] GetPermutationOrder(string key)
+{
+    int[] permutationOrder = new int[key.Length];
+    for (int i = 0; i < key.Length; i++)
+    {
+        permutationOrder[i] = i;
+    }
+
+    Array.Sort(key.ToCharArray(), permutationOrder);
+    return permutationOrder;
+}
+\end{lstlisting}
+
+\subsection{Description of code needed to perform Encryption and Decryption of the Transposition Cipher}
+An array named permutationOrder is created, this array will hold the indices of the key in the sorted order thus the length of this array is the same as the length of the key. A for loop is used to initialise each element of the permutationOrder array, the total index is depended on the length of the key that is used. In order to sort the permutationOrder array the Array.Sort() method is used to sort this array by converting the key sting to a chapter array. The Array.Sort() method sorts the character array and rearranges the permutationOrder array in parallel to maintain the relative order of the original indices according to the sorted characters. The permutationOrder array will now contain indices that reflect the order of characters in the sorted key. The permutationOrder array is returned, to be used for encryption and decryption, the array now contains the indices of the key string and is sorted in ascending order of their corresponding characters.
+
 \section{Encryption}
 \begin{lstlisting}[language=Csh, caption={Code for Transposition Cipher Encryption}]
+// Function to encrypt bytes using transposition cipher
+private static byte[] TranspositionEncrypt(byte[] inputBytes, string key)
+{
+    int[] permutationOrder = GetPermutationOrder(key);
+
+    int keyLength = key.Length;
+    int numRows = (int)Math.Ceiling((double)inputBytes.Length 
+    / keyLength);
+
+    byte[,] matrix = new byte[numRows, keyLength];
+
+    // Populate the matrix with input bytes
+    for (int i = 0; i < inputBytes.Length; i++)
+    {
+        matrix[i / keyLength, i % keyLength] = inputBytes[i];
+    }
+
+    List<byte> encryptedBytes = new List<byte>();
+
+    // Read the matrix column-wise according to permutation order
+    foreach (int column in permutationOrder)
+    {
+        for (int row = 0; row < numRows; row++)
+        {
+            encryptedBytes.Add(matrix[row, column]);
+        }
+    }
+
+    return encryptedBytes.ToArray();
+}
+
+// Function to encrypt a file using transposition cipher
+public static bool TranspositionEncryptBinaryFile(string inputFile, 
+string outputFile, string key)
+{
+    try
+    {
+        fileExtension = Path.GetExtension(inputFile);
+        byte[] fileBytes = File.ReadAllBytes(inputFile);
+        byte[] encryptedBytes = TranspositionEncrypt(fileBytes, key);
+        File.WriteAllBytes(outputFile, encryptedBytes);
+        return true;
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("Error encrypting file: " + ex.Message);
+        return false;
+    }
+}
 \end{lstlisting}
 
 \subsection{Description of Transposition Cipher Encryption}
 
+The TranspositionEncrypt() method works as follows:
+A array named permutationOrder is created and calls the GetPermutationOrder () method to obtain the permutation order that is based on the key. The number of rows needed to accommodate the input bytes when distributed into a matrix with columns equal to the length of the key is calculated. In order to keep the amount of rows needed an integer the Math.Ceiling() method is used. An array named matrix, with the number of rows equal to the numRows variable and the number of columns equal to the length of the key, is created. In order to populate the array, row-wise, with the input bytes a for loop is used, where i / keyLength determines the current row and i \% keyLength determines the current column. To store the encrypted bytes an empty list name encryptedBytes is initialised. Two for loops are used to iterate through each row, the inner for loop, in each column, the outer loop, and adding them to the encryptedBytes list. The encryptedBytes list is returned as an array to be used in the TranspositionEncryptBinaryFile() method.
+
+The TranspositionEncryptBinaryFile() method works as follows:
+The global variable fileExtension is set to the file exception of the input file, to get the file exception of the input file the method GetFileExtension() is used. A new byte array named fileBytes are created and the bytes from the input file is read into the array. A byte array named encryptedBytes is assigned the value that is returned by the TranspositionEncrypt() method, and takes the fileBytes array and the key as arguments. The content of the encryptedBytes array is written in to the output file. If the encryption process is completed this method will return true to indicate that the encryption was successful. If any exception occurs during this process a message box will show on the screen stating that the encryption failed, and a false will be return to indicate that the encryption failed.
+
 \section{Decryption}
 \begin{lstlisting}[language=Csh, caption={Code for Transposition Cipher Decryption}]
+// Function to decrypt bytes using transposition cipher
+private static byte[] TranspositionDecrypt(byte[] encryptedBytes, 
+string key)
+{
+    int[] permutationOrder = GetPermutationOrder(key);
+
+    int keyLength = key.Length;
+    int numRows = (int)Math.Ceiling((double)encryptedBytes.Length 
+    / keyLength);
+
+    byte[,] matrix = new byte[numRows, keyLength];
+
+    // Populate the matrix column-wise according to permutation order
+    int encryptedIndex = 0;
+    foreach (int column in permutationOrder)
+    {
+        for (int row = 0; row < numRows; row++)
+        {
+            matrix[row, column] = encryptedBytes[encryptedIndex++];
+        }
+    }
+
+    List<byte> decryptedBytes = new List<byte>();
+
+    // Read the matrix row-wise to obtain decrypted bytes
+    for (int i = 0; i < numRows; i++)
+    {
+        for (int j = 0; j < keyLength; j++)
+        {
+            decryptedBytes.Add(matrix[i, j]);
+        }
+    }
+
+    return decryptedBytes.ToArray();
+}
+
+// Function to decrypt a file using transposition cipher
+public static bool TranspositionDecryptBinaryFile(string encryptedFile, 
+string decryptedFile, string key)
+{
+    try
+    {
+        byte[] encryptedBytes = File.ReadAllBytes(encryptedFile);
+        byte[] decryptedBytes = TranspositionDecrypt(encryptedBytes, key);
+        File.WriteAllBytes(decryptedFile, decryptedBytes);
+        return true;
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("Error decrypting file: " + ex.Message);
+        return false;
+    }
+}
 \end{lstlisting}
 
 \subsection{Description of Transposition Cipher Decryption}
 
+The TranspositionDecrypt() method works as follows:
+A array named permutationOrder is created and calls the GetPermutationOrder () method to obtain the permutation order that is based on the key. The number of rows needed to accommodate the encrypt bytes when distributed into a matrix with columns equal to the length of the key is calculated. In order to keep the amount of rows needed an integer the Math.Ceiling() method is used. An array named matrix, with the number of rows equal to the numRows variable and the number of columns equal to the length of the key, is created. In order to populate the matrix array column-wise according to the permutation order the encryptedIndex is first set to 0, and two for loops are used the outer for loop is used to populate the columns and the inner for loop is used to populate the rows of each of the columns. The encryptedIndex is iterated to move to the next byte. To store the decrypted bytes an empty list name decryptedBytes is initialised. Two for loops are used to iterate through each row, the inner for loop, in each column, the outer loop, and adding them to the decryptedBytes list. The decryptedBytes list is returned as an array to be used in the TranspositionDecryptBinaryFile() method.
+
+The TranspositionDecryptBinaryFile() method works as follows:
+A new byte array named encryptedBytes are created and the bytes from the encrypted file is read into the array. A byte array named decryptedBytes is assigned the value that is returned by the TranspositionDecrypt() method, and takes the encryptedBytes array and the key as arguments. The content of the decryptedBytes array is written in to the decrypted file. If the encryption process is completed this method will return true to indicate that the encryption was successful. If any exception occurs during this process a message box will show on the screen stating that the encryption failed, and a false will be return to indicate that the encryption failed.
+
 \chapter[Special Cipher]{Special Cipher}
+
+\section{Code needed to perform Encryption and Decryption of the Special Cipher}
+\begin{lstlisting}[language=Csh, caption={Code for Special Cipher}]
+private static RSAParameters publicKey;
+private static RSAParameters privateKey;
+
+public static void GenerateRSAKeys()
+{
+    using (var rsa = new RSACryptoServiceProvider(2048))
+    {
+        publicKey = rsa.ExportParameters(false);
+        privateKey = rsa.ExportParameters(true);
+    }
+}
+
+public static byte[] GenerateAESKey()
+{
+    using (var aes = Aes.Create())
+    {
+        aes.GenerateKey();
+        return aes.Key;
+    }
+}
+\end{lstlisting}
+
+\subsection{Description of code needed to perform Encryption and Decryption of the Special Cipher}
+
+
 \section{Encryption}
 \begin{lstlisting}[language=Csh, caption={Code for Special Cipher Encryption}]
+public static byte[] EncryptRSA(byte[] data)
+{
+    using (var rsa = new RSACryptoServiceProvider())
+    {
+        rsa.ImportParameters(publicKey);
+        return rsa.Encrypt(data, RSAEncryptionPadding.Pkcs1);
+    }
+}
+
+public static byte[] EncryptAES(byte[] data, byte[] key)
+{
+    using (var aes = Aes.Create())
+    {
+        aes.Key = key;
+        using (var encryptor = aes.CreateEncryptor())
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using (CryptoStream cs = new CryptoStream(ms, 
+                encryptor, CryptoStreamMode.Write))
+                {
+                    cs.Write(data, 0, data.Length);
+                    cs.FlushFinalBlock();
+                }
+                return ms.ToArray();
+            }
+        }
+    }
+}
+
 public static bool EncryptFileHybrid(string inputFile, 
 string outputFile)
 {
@@ -394,6 +601,36 @@ string outputFile)
 
 \section{Decryption}
 \begin{lstlisting}[language=Csh, caption={Code for Special Cipher Decryption}]
+public static byte[] DecryptRSA(byte[] data, RSAParameters privateKey)
+{
+    using (var rsa = new RSACryptoServiceProvider())
+    {
+        rsa.ImportParameters(privateKey);
+        return rsa.Decrypt(data, RSAEncryptionPadding.Pkcs1);
+    }
+}
+
+public static byte[] DecryptAES(byte[] data, byte[] key)
+{
+    using (var aes = Aes.Create())
+    {
+        aes.Key = key;
+        using (var decryptor = aes.CreateDecryptor())
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using (CryptoStream cs = new CryptoStream(ms, decryptor, 
+                CryptoStreamMode.Write))
+                {
+                    cs.Write(data, 0, data.Length);
+                    cs.FlushFinalBlock();
+                }
+                return ms.ToArray();
+            }
+        }
+    }
+}
+
 public static bool DecryptFileHybrid(string inputFile, string outputFile)
 {
     try
