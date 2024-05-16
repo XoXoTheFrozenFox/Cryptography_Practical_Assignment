@@ -336,7 +336,7 @@ string outputFile, string key)
 \subsection{Description of Vernam Cipher Decryption}
 
 The decryption algorithm of this Vernam Cipher works as follows:
-By using File.ReadAllBytes() the completed of the input file is read into a byte array called dataToDecrypt. A new byte array called decryptedData is created that will hold the encrypted bytes, this array has the same length as dataToDecrypt. By using a for loop to iterate through each byte in the dataToDecrypt array, just like the encryption, a bitwise XOR (\^) operation is performed between each byte of the input data and the corresponding byte of the key. If the key is shorter than the input data it repeated, by using the modulus operator \% with the length of the key. The result of the XOR operation on the  dataToDecrypt array is stored in the decryptedData array. Once all of the bytes are encrypted the contents of the decryptedData array is written to the output file by using the File.WriteAllBytes() method. The global variable fileExtension is set to the file exception of the input file, to get the file exception of the input file the method GetFileExtension() is used. If the decryption process is completed this method will return true to indicate that the decryption was successful. If any exception occurs during this process a message box will show on the screen stating that the decryption failed, and a false will be return to indicate that the decryption failed.
+By using File.ReadAllBytes() the completed of the input file is read into a byte array called dataToDecrypt. A new byte array called decryptedData is created that will hold the encrypted bytes, this array has the same length as dataToDecrypt. By using a for loop to iterate through each byte in the dataToDecrypt array, just like the encryption, a bitwise XOR (\^{}) operation is performed between each byte of the input data and the corresponding byte of the key. If the key is shorter than the input data it repeated, by using the modulus operator \% with the length of the key. The result of the XOR operation on the  dataToDecrypt array is stored in the decryptedData array. Once all of the bytes are encrypted the contents of the decryptedData array is written to the output file by using the File.WriteAllBytes() method. The global variable fileExtension is set to the file exception of the input file, to get the file exception of the input file the method GetFileExtension() is used. If the decryption process is completed this method will return true to indicate that the decryption was successful. If any exception occurs during this process a message box will show on the screen stating that the decryption failed, and a false will be return to indicate that the decryption failed.
 
 \chapter[Transposition Cipher]{Transposition Cipher}
 
@@ -497,7 +497,7 @@ public static void GenerateRSAKeys()
     using (var rsa = new RSACryptoServiceProvider(2048))
     {
         publicKey = rsa.ExportParameters(false);
-        privateKey = rsa.ExportParameters(true);
+        privateKey = rsa.ExportParameters(true); 
     }
 }
 
@@ -513,6 +513,7 @@ public static byte[] GenerateAESKey()
 
 \subsection{Description of code needed to perform Encryption and Decryption of the Special Cipher}
 
+RSAParameters is a structure that holds the parameters for the RSA algorithm, including the modulus and exponent for the public key and additional parameters for the private key. The RSA public and private keys are stored in the publicKey and privateKey respectively. The GenerateRSAKeys() method generates a new RSA key pair. A new instance of the RSACryptoServiceProvider class is created with key size of 2048 bits. The public key parameters are exported, with the false that indicate that only the public key must be exported. Both the public and private keys are exported, with the true that indicate that the private part of the key must also be included. The GenerateAESKey() method generates a new AES key. A new instance of the default implementation of the AES algorithm is generated. aes.GenerateKey() is used to generate a random key that will be used in the AES algorithm, this key is returned, as a byte array, to be used latter.
 
 \section{Encryption}
 \begin{lstlisting}[language=Csh, caption={Code for Special Cipher Encryption}]
@@ -601,6 +602,15 @@ string outputFile)
 \end{lstlisting}
 
 \subsection{Description of Special Cipher Encryption}
+
+The EncryptRSA() method for this encryption method works as follows:
+A new instance of the RSA cryptographic service provider is initialised. The The public RSA parameters that are stored in publicKey is imported. The encrypted input data is returned. This data in encrypted by using the RSA public key with PKCS\#1 padding.
+
+The EncryptAES() method for this encryption method works as follows:
+A new instance of AES algorithm is created. The encryption key for the AES instance is set. A symmetric encryptor object with the specified key and initialization vector is created, if a initialization vector is not specified it is created automatically. A memory stream that holds the encrypted data is created. A CryptoStream that links the memory stream to the AES encryptor is created, which will handle the encryption process. Input data is written to the CryptoStream, which encrypts it and writes the encrypted data to the memory stream. cs.FlushFinalBlock() ensures that all data is written and the encryption process is completed. This method is necessary to finalize the encryption process and ensure the integrity of the encrypted data. The memory stream is converted to a byte array, which contains the encrypted data. This byte array is than returned to be used latter.
+
+The EncryptFileHybrid() method, which is the method that combines the above mentioned methods, works as follows:
+
 
 \section{Decryption}
 \begin{lstlisting}[language=Csh, caption={Code for Special Cipher Decryption}]
