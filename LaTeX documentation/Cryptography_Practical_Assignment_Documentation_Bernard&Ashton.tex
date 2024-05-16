@@ -25,8 +25,11 @@
 \pagenumbering{arabic} 
 
 \chapter[General Information]{General Information}
-
-\includegraphics[width=0.3\textwidth]{Cryptography_Practical_Assignment_GUI.png}
+\begin{figure}[h]
+    \centering
+    \makebox[\textwidth][c]{\includegraphics[width=1\textwidth, height=1\textheight, keepaspectratio]{Cryptography_Practical_Assignment_GUI.png}}
+    \caption{GUI of Cryptography Application.}
+\end{figure}
 
 \chapter[RSA]{RSA}
 \section{Encryption}
@@ -293,10 +296,10 @@ string outputFile, string key)
 }
 \end{lstlisting}
 
-\subsection{Description of Vernam Cipher Encryption}
+\subsection{Encryption of Vernam Cipher Encryption}
 
 The encryption algorithm for this Vernam Cipher works as follows:
-By using File.ReadAllBytes() the completed of the input file is read into a byte array called dataToEncrypt. A new byte array called encryptedData is created that will hold the encrypted bytes, this array has the same length as dataToEncrypt. By using a for loop to iterate through each byte in the dataToEncrypt array, a bitwise XOR (\^) operation is performed between each byte of the input data and the corresponding byte of the key. If the key is shorter than the input data it repeated, by using the modulus operator \% with the length of the key. The result of the XOR operation on the  dataToEncrypt array is stored in the encryptedData array. Once all of the bytes are encrypted the contents of the encryptedData array is written to the output file by using the File.WriteAllBytes() method. The global variable fileExtension is set to the file exception of the input file, to get the file exception of the input file the method GetFileExtension() is used. If the encryption process is completed this method will return true to indicate that the encryption was successful. If any exception occurs during this process a message box will show on the screen stating that the encryption failed, and a false will be return to indicate that the encryption failed.
+By using File.ReadAllBytes() the completed of the input file is read into a byte array called dataToEncrypt. A new byte array called encryptedData is created that will hold the encrypted bytes, this array has the same length as dataToEncrypt. By using a for loop to iterate through each byte in the dataToEncrypt array, a bitwise XOR (\^{}) operation is performed between each byte of the input data and the corresponding byte of the key. If the key is shorter than the input data it repeated, by using the modulus operator \% with the length of the key. The result of the XOR operation on the  dataToEncrypt array is stored in the encryptedData array. Once all of the bytes are encrypted the contents of the encryptedData array is written to the output file by using the File.WriteAllBytes() method. The global variable fileExtension is set to the file exception of the input file, to get the file exception of the input file the method GetFileExtension() is used. If the encryption process is completed this method will return true to indicate that the encryption was successful. If any exception occurs during this process a message box will show on the screen stating that the encryption failed, and a false will be return to indicate that the encryption failed.
 
 \section{Decryption}
 \begin{lstlisting}[language=Csh, caption={Code for Vernam Cipher Decryption}]
@@ -684,11 +687,5 @@ public static bool DecryptFileHybrid(string inputFile, string outputFile)
 \subsection{Description of Special Cipher Decryption}
 
 
-
-Cite 1\citep{AUT2018}.\vspace{0.25cm}
-\noindent Cite 2 \citep{AUT1999}
-
-
-\bibliography{MyBib}
 
 \end{document}
