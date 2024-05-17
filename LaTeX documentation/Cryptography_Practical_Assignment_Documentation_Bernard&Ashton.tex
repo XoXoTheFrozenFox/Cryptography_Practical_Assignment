@@ -25,13 +25,41 @@
 \pagenumbering{arabic} 
 
 \chapter[General Information]{General Information}
+
+This manual consists out of six algorithms, namely RSA, Caesar, Vigenère, Vernam, Transposition, and our version of a cryptographic algorithm. Each of these algorithms contain both encryption and decryption options. Bellow is an image of how the applications Graphic User Interface (GUI) looks like.
+
 \begin{figure}[h]
     \centering
     \makebox[\textwidth][c]{\includegraphics[width=1\textwidth, height=1\textheight, keepaspectratio]{Cryptography_Practical_Assignment_GUI.png}}
     \caption{GUI of Cryptography Application.}
 \end{figure}
 
+The users do not have to give any text input in terms of the file path regarding data that they want to encrypt and decrypt. The RSA and the Special algorithms are the only cryptographic algorithm that does not need the user to provide a key to preform both encryption and decryption.
+
+The encryption and decryption buttons of each of the algorithms calls the methods of the encryption or decryption depend on the algorithm that the user selected. The user can then select the file that they want to encrypt or decrypt. The file path of the selected file that the user wants to encrypt or decrypt will be displayed in the file path field. Once the file that the user want to encrypt or decrypt is encrypted or decrypted it will be saved under Downloads on the users' device. Bellow is the description of how each of the algorithms work.
+
 \chapter[RSA]{RSA}
+
+\section{Code needed to perform Encryption and Description of the RSA algorithm}
+
+\begin{lstlisting}[language=Csh, caption={Code for RSA algorithm}]
+private static RSAParameters publicKey;
+private static RSAParameters privateKey;
+
+public static void GenerateRSAKeys()
+{
+    using (var rsa = new RSACryptoServiceProvider(2048))
+    {
+        publicKey = rsa.ExportParameters(false);
+        privateKey = rsa.ExportParameters(true);
+    }
+}
+\end{lstlisting}
+
+\section{Description of code needed to perform the RSA algorithm}
+
+RSAParameters is a structure that holds the parameters for the RSA algorithm, including the modulus and exponent for the public key and additional parameters for the private key. The RSA public and private keys are stored in the publicKey and privateKey respectively. The GenerateRSAKeys() method generates a new RSA key pair. A new instance of the RSACryptoServiceProvider class is created with key size of 2048 bits. The public key parameters are exported, with the false that indicate that only the public key must be exported. Both the public and private keys are exported, with the true that indicate that the private part of the key must also be included.
+
 \section{Encryption}
 \begin{lstlisting}[language=Csh, caption={Code for RSA Encryption}]
 public static bool EncryptFileRSA(string inputFile, string outputFile)
@@ -483,7 +511,7 @@ The TranspositionDecrypt() method works as follows:
 A array named permutationOrder is created and calls the GetPermutationOrder () method to obtain the permutation order that is based on the key. The number of rows needed to accommodate the encrypt bytes when distributed into a matrix with columns equal to the length of the key is calculated. In order to keep the amount of rows needed an integer the Math.Ceiling() method is used. An array named matrix, with the number of rows equal to the numRows variable and the number of columns equal to the length of the key, is created. In order to populate the matrix array column-wise according to the permutation order the encryptedIndex is first set to 0, and two for loops are used the outer for loop is used to populate the columns and the inner for loop is used to populate the rows of each of the columns. The encryptedIndex is iterated to move to the next byte. To store the decrypted bytes an empty list name decryptedBytes is initialised. Two for loops are used to iterate through each row, the inner for loop, in each column, the outer loop, and adding them to the decryptedBytes list. The decryptedBytes list is returned as an array to be used in the TranspositionDecryptBinaryFile() method.
 
 The TranspositionDecryptBinaryFile() method works as follows:
-A new byte array named encryptedBytes are created and the bytes from the encrypted file is read into the array. A byte array named decryptedBytes is assigned the value that is returned by the TranspositionDecrypt() method, and takes the encryptedBytes array and the key as arguments. The content of the decryptedBytes array is written in to the decrypted file. If the encryption process is completed this method will return true to indicate that the encryption was successful. If any exception occurs during this process a message box will show on the screen stating that the encryption failed, and a false will be return to indicate that the encryption failed.
+A new byte array named encryptedBytes are created and the bytes from the encrypted file is read into the array. A byte array named decryptedBytes is assigned the value that is returned by the TranspositionDecrypt() method, and takes the encryptedBytes array and the key as arguments. The content of the decryptedBytes array is written in to the decrypted file. If the decryption process is completed this method will return true to indicate that the decryption was successful. If any exception occurs during this process a message box will show on the screen stating that the decryption failed, and a false will be return to indicate that the decryption failed.
 
 \chapter[Special Cipher]{Special Cipher}
 
@@ -610,7 +638,7 @@ The EncryptAES() method for this encryption method works as follows:
 A new instance of AES algorithm is created. The encryption key for the AES instance is set. A symmetric encryptor object with the specified key and initialization vector is created, if a initialization vector is not specified it is created automatically. A memory stream that holds the encrypted data is created. A CryptoStream that links the memory stream to the AES encryptor is created, which will handle the encryption process. Input data is written to the CryptoStream, which encrypts it and writes the encrypted data to the memory stream. cs.FlushFinalBlock() ensures that all data is written and the encryption process is completed. This method is necessary to finalize the encryption process and ensure the integrity of the encrypted data. The memory stream is converted to a byte array, which contains the encrypted data. This byte array is than returned to be used latter.
 
 The EncryptFileHybrid() method, which is the method that combines the above mentioned methods, works as follows:
-
+The GenerateRSAKeys() method is called to generate public and private keys for the encryption. The GenerateAESKey() method is called and the AES key that it returns is sorted in a byte array. The AES key that was generated is encrypted by the EncryptRSA() method, by using the RSA public key. The contains of the input file is read into a byte array. An instance of the AES algorithm is created, and its key is set to the previously generated AES key. A new Initialization Vector (IV) for the AES encryption is created. The IV is written at the beginning with the use of MemoryStream(). The file data is encrypted with AES by CryptoStream(), the encrypted data is written to the MemoryStream. The content of the MemoryStream is converted to a byte array. The encrypted AES key and the encrypted file data is combined into a single stream. The combined stream is written to an output file. If the encryption process is completed this method will return true to indicate that the encryption was successful. If any exception occurs during this process a message box will show on the screen stating that the encryption failed, and a false will be return to indicate that the encryption failed.
 
 \section{Decryption}
 \begin{lstlisting}[language=Csh, caption={Code for Special Cipher Decryption}]
@@ -696,6 +724,12 @@ public static bool DecryptFileHybrid(string inputFile, string outputFile)
 
 \subsection{Description of Special Cipher Decryption}
 
+The DecryptRSA() method for the decryption process works the same as the EncryptRSA() method for the encryption process, to decrypt the provided encrypted data.
 
+The DecryptAES() method for the decryption process works the same as the EncryptAES() method for the encryption process, to return a byte array that contains the depended data.
+
+The DecryptFileHybrid() method, which is the method that combines the above mentioned methods, works as follows:
+
+The bytes of the encrypted file is read into a byte array. The first 256 bytes which contains the AES key is separated from the remainder of the bytes in the file, which contains the encrypted data. The encrypted AES key is decrypted by the DecryptRSA() method by using the private key. The decrypted AES key is stored in a byte array. An instance of the AES algorithm is created and the AES key is set to the decryption key. The initialization vector (IV) from the start of the encrypted data is extracted and stored in a byte array. A MemoryStream is created that starts after the IV. A CryptoStream is created to decrypt the data while it is being read from the MemoryStream. Another MemoryStream is created to store the decrypted data. The decrypted data from the CryptoStream is copied to the new MemoryStream. The decrypted data is written to the output file. If the decryption process is completed this method will return true to indicate that the decryption was successful. If any exception occurs during this process a message box will show on the screen stating that the decryption failed, and a false will be return to indicate that the decryption failed.
 
 \end{document}
